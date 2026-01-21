@@ -15,6 +15,7 @@ const path = require("path");
 const DataURI = require("datauri");
 const Log = require("logger");
 const NodeHelper = require("node_helper");
+const moduleName = "[MMM-RTSPSteam]";
 
 const environ = Object.assign(process.env, {DISPLAY: ":0"});
 
@@ -33,11 +34,12 @@ module.exports = NodeHelper.create({
   snapshots: {},
 
   start () {
+    Log.log(`Starting ${moduleName}`);
     this.started = false;
   },
 
   stop () {
-    Log.log(`Shutting down MMM-RTSPStream (localPlayer=${this.config.localPlayer})`);
+    Log.log(`Shutting down ${moduleName} (localPlayer=${this.config.localPlayer})`);
 
     // Kill any VLC/MPlayer Streams that are open
     if (this.config.localPlayer === "vlc" || this.config.localPlayer === "mplayer") {
@@ -57,13 +59,13 @@ module.exports = NodeHelper.create({
   },
 
   getData (name) {
-    // Log.log("Getting data for "+name);
+    Log.log(`${moduleName} getting data for ${name}`);
     const self = this;
 
     const snapUrl = this.config[name].snapshotUrl;
 
     if (!snapUrl) {
-      Log.log(`No snapshotUrl given for ${name}. Ignoring.`);
+      Log.log(`${moduleName} No snapshotUrl given for ${name}. Ignoring.`);
       return;
     }
 
@@ -116,6 +118,7 @@ module.exports = NodeHelper.create({
   },
 
   getVlcPlayer (payload) {
+    Log.log(`${moduleName} getVlcPlayer`);
     const opts = {
       detached: false,
       env: environ,
@@ -189,12 +192,12 @@ module.exports = NodeHelper.create({
             args.unshift("--no-audio");
           }
         }
-        Log.log(`Starting stream ${s.name} using ${playerCmd.toUpperCase()} with args ${args.join(" ")}...`);
+        Log.log(`${moduleName} Starting stream ${s.name} using ${playerCmd.toUpperCase()} with args ${args.join(" ")}...`);
 
         this.vlcStream[s.name] = child_process.spawn(playerCmd, args, opts);
 
         this.vlcStream[s.name].on("error", () => {
-          Log.error(`Failed to start subprocess: ${this.vlcStream[s.name]}.`);
+          Log.error(`${moduleName} Failed to start subprocess: ${this.vlcStream[s.name]}.`);
         });
 
         dp2Check = true;
@@ -239,7 +242,7 @@ end
         this.dp2.kill();
         this.dp2 = undefined;
       }
-      Log.info("DP2: Running window resizers...");
+      Log.info(`${moduleName} DP2: Running window resizers...`);
       this.dp2 = child_process.spawn(dp2Cmd, dp2Args, opts);
       this.dp2.on("error", () => {
         Log.error("DP2: Failed to start.");
@@ -249,7 +252,7 @@ end
     const vlcLuaPath = path.resolve(`${__dirname}/scripts/vlc.lua`);
     // Check if the vlc.lua file exists, if not, create it.
     if (!fs.existsSync(vlcLuaPath)) {
-      Log.log("DP2: Creating vlc.lua file...");
+      Log.log(`${moduleName} DP2: Creating vlc.lua file...`);
       fs.writeFileSync(vlcLuaPath, "");
     }
     fs.readFile(
@@ -271,7 +274,7 @@ end
                 throw innerErr;
               }
 
-              Log.log("DP2: Config File Saved!");
+              Log.log(`${moduleName} DP2: Config File Saved!`);
               if (this.config.debug) {
                 Log.log(dp2Config);
               }
@@ -294,7 +297,7 @@ end
 
   stopVlcPlayer (name, delay, callback) {
     const quitVlc = () => {
-      Log.log(`Stopping stream ${name}`);
+      Log.log(`${moduleName} Stopping stream ${name}`);
       if (name in this.vlcStream) {
         try {
           this.vlcStream[name].stderr.removeAllListeners();
@@ -334,8 +337,8 @@ end
   stopAllVlcPlayers (delay, callback) {
     if (Object.keys(this.vlcStream).length > 0) {
       Log.log(delay
-        ? `Delayed exit of all VLC Streams in ${delay} sec...`
-        : "Killing All VLC Streams...");
+        ? `${moduleName} Delayed exit of all VLC Streams in ${delay} sec...`
+        : `${moduleName} Killing All VLC Streams...`);
       Object.keys(this.vlcStream).forEach((s) => {
         if (delay) {
           this.stopVlcPlayer(s, delay);
@@ -377,15 +380,15 @@ end
       ) {
         const suggestedDelay =
           (streams.length - 1) * this.config.rotateStreamsTimeout + 2;
-        Log.warn(`WARNING: shutdownDelay is shorter than the time it takes to make it through the loop. Consider increasing to ${suggestedDelay}s.`);
+        Log.warn(`${moduleName} WARNING: shutdownDelay is shorter than the time it takes to make it through the loop. Consider increasing to ${suggestedDelay}s.`);
       }
       // Warn & sanitize legacy config values
       if (this.config.localPlayer === "ffmpeg") {
-        Log.warn("MMM-RTSPStream: localPlayer 'ffmpeg' removed in v4.0.0. For local playback only 'vlc' is supported.");
+        Log.warn(`${moduleName} localPlayer 'ffmpeg' removed in v4.0.0. For local playback only 'vlc' is supported.`);
         this.config.localPlayer = "vlc";
       }
       if (this.config.remotePlayer === "ffmpeg") {
-        Log.warn("MMM-RTSPStream: remotePlayer 'ffmpeg' removed in v4.0.0. Use 'webrtc' (with whepUrl per stream) or 'none'.");
+        Log.warn(`${moduleName} remotePlayer 'ffmpeg' removed in v4.0.0. Use 'webrtc' (with whepUrl per stream) or 'none'.`);
         this.config.remotePlayer = "none";
       }
       streams.forEach((name) => this.sendSocketNotification("STARTED", name));

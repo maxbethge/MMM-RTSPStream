@@ -107,6 +107,7 @@ Module.register("MMM-RTSPStream", {
   },
 
   setupStreamRotation () {
+    Log.info(`[${this.name}] in setupStreamRotation`);
     this.playing = this.config.autoStart;
     // Reference to function for manual transitions (TODO: FUTURE)
     this.manualTransition = this.rotateStream.bind(this);
@@ -120,6 +121,8 @@ Module.register("MMM-RTSPStream", {
     let ps;
     const resetCurrentIndex = k.length;
     const lastStream = this.currentStream;
+
+    Log.info(`[${this.name}] in rotateStream`);
 
     // Update the current index
     if (goToStream && goToStream in this.streams) {
@@ -160,7 +163,7 @@ Module.register("MMM-RTSPStream", {
   restartTimer () {
     if (
       this.config.rotateStreams &&
-      Object.keys(this.streams).length > 1 &&
+      /*Object.keys(this.streams).length > 1 && */
       this.config.rotateStreamTimeout > 0
     ) {
       // Restart the timer
@@ -552,6 +555,7 @@ Module.register("MMM-RTSPStream", {
 
   stopStream (stream, vlcStopAll = false) {
     if (this.streams[stream].playing) {
+      Log.info(`[${this.name}] Stopping ${stream}`);
       if (
         this.instance === "SERVER" &&
         this.config.localPlayer === "vlc" &&
@@ -590,6 +594,7 @@ Module.register("MMM-RTSPStream", {
   stopAllStreams (startSnapshots = true) {
     let vlcStopAll = false;
     if (this.instance === "SERVER" && this.config.localPlayer === "vlc") {
+      Log.info(`[${this.name}] Stopping all streams`);
       this.sendSocketNotification(
         "STOP_ALL_VLCSTREAMS",
         this.config.shutdownDelay
