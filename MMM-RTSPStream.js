@@ -432,7 +432,8 @@ Module.register("MMM-RTSPStream", {
     const webrtcActive = this.instance === "LOCAL" && this.config.remotePlayer === "webrtc" || this.instance === "SERVER" && this.config.localPlayer === "webrtc";
 
     if (this.instance === "SERVER" && this.config.localPlayer === "vlc") {
-      Log.info(`[${this.name}] instance==SERVER,localPlayer=vlc,moduleOffset:${JSON.stringify(this.config.moduleOffset})`);
+      const mo = 
+      Log.info(`[${this.name}] instance==SERVER,localPlayer=vlc,moduleOffset:${JSON.stringify(this.config.moduleOffset)}`);
       const rect = surface.getBoundingClientRect();
       const offset = {};
       const payload = {name: stream};
