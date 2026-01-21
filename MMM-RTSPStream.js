@@ -432,7 +432,7 @@ Module.register("MMM-RTSPStream", {
     const webrtcActive = this.instance === "LOCAL" && this.config.remotePlayer === "webrtc" || this.instance === "SERVER" && this.config.localPlayer === "webrtc";
 
     if (this.instance === "SERVER" && this.config.localPlayer === "vlc") {
-      Log.info(`[${this.name}] instance==SERVER,localPlayer=vlc,moduleOffset:${this.config.moduleOffset}`);
+      Log.info(`[${this.name}] instance==SERVER,localPlayer=vlc,moduleOffset:${JSON.stringify(this.config.moduleOffset})`);
       const rect = surface.getBoundingClientRect();
       const offset = {};
       const payload = {name: stream};
@@ -466,7 +466,7 @@ Module.register("MMM-RTSPStream", {
           left: Math.round(rect.left + offset.left) // Compensate for Margins
         };
       }
-      Log.info(`[${this.name}] box:${box}`);
+      Log.info(`[${this.name}] box:${JSON.stringify(box)}`);
       payload.box = box;
       vlcPayload.push(payload);
     } else if (webrtcActive) {
