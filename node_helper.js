@@ -30,7 +30,6 @@ module.exports = NodeHelper.create({
   vlcStream: {},
   vlcStreamTimeouts: {},
   vlcDelayedExit: {},
-  vlcLoaded: false,
   snapshots: {},
 
   start () {
@@ -201,7 +200,6 @@ module.exports = NodeHelper.create({
         });
 
         dp2Check = true;
-        this.vlcLoaded = true;
       }
     });
 
