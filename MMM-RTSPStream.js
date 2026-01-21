@@ -424,6 +424,7 @@ Module.register("MMM-RTSPStream", {
       : `canvas_${stream}`;
     const surface = document.getElementById(canvasId);
     const vlcPayload = [];
+    const vlcAlreadyLoaded = this.streams[stream].playing;
 
     if (this.streams[stream].playing) {
       this.stopStream(stream);
@@ -433,7 +434,7 @@ Module.register("MMM-RTSPStream", {
 
     if (this.instance === "SERVER" && this.config.localPlayer === "vlc") {
       const rect = surface.getBoundingClientRect();
-      Log.info(`[${this.name}] instance==SERVER,localPlayer=vlc,moduleOffset:${JSON.stringify(this.config.moduleOffset)},rect:${JSON.stringify(rect)}`);
+      Log.info(`[${this.name}] instance:SERVER, localPlayer:vlc, vlcAlreadyLoaded:${vlcAlreadyLoaded}, moduleOffset:${JSON.stringify(this.config.moduleOffset)}, rect:${JSON.stringify(rect)}`);
       const offset = {};
       const payload = {name: stream};
       if (typeof this.config.moduleOffset === "object") {
@@ -458,6 +459,13 @@ Module.register("MMM-RTSPStream", {
         box = absPosition;
       } else if (fullscreen) {
         payload.fullscreen = true;
+      } else if (vlcAlreadyLoaded) { /* Don't add the offsets again */
+        box = {
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          left: rect.left
+        };
       } else {
         box = {
           top: Math.round(rect.top + offset.top), // Compensate for Margins
