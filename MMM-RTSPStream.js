@@ -424,7 +424,7 @@ Module.register("MMM-RTSPStream", {
       : `canvas_${stream}`;
     const surface = document.getElementById(canvasId);
     const vlcPayload = [];
-    const vlcAlreadyLoaded = this.streams[stream].playing;
+    const vlcAlreadyLoaded = this.vlcLoaded;
 
     if (this.streams[stream].playing) {
       this.stopStream(stream);

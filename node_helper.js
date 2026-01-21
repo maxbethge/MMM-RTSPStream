@@ -30,21 +30,21 @@ module.exports = NodeHelper.create({
   vlcStream: {},
   vlcStreamTimeouts: {},
   vlcDelayedExit: {},
-
+  vlcLoaded: false,
   snapshots: {},
 
   start () {
-    Log.log(`Starting ${moduleName}`);
+    Log.info(`Starting ${moduleName}`);
     this.started = false;
   },
 
   stop () {
-    Log.log(`Shutting down ${moduleName} (localPlayer=${this.config.localPlayer})`);
+    Log.info(`Shutting down ${moduleName} (localPlayer=${this.config.localPlayer})`);
 
     // Kill any VLC/MPlayer Streams that are open
     if (this.config.localPlayer === "vlc" || this.config.localPlayer === "mplayer") {
       if (this.dp2) {
-        Log.log("Killing DevilsPie2...");
+        Log.info("Killing DevilsPie2...");
         this.dp2.stderr.removeAllListeners();
         this.dp2.kill();
         this.dp2 = undefined;
@@ -59,13 +59,13 @@ module.exports = NodeHelper.create({
   },
 
   getData (name) {
-    Log.log(`${moduleName} getting data for ${name}`);
+    Log.info(`${moduleName} getting data for ${name}`);
     const self = this;
 
     const snapUrl = this.config[name].snapshotUrl;
 
     if (!snapUrl) {
-      Log.log(`${moduleName} No snapshotUrl given for ${name}. Ignoring.`);
+      Log.info(`${moduleName} No snapshotUrl given for ${name}. Ignoring.`);
       return;
     }
 
@@ -118,7 +118,7 @@ module.exports = NodeHelper.create({
   },
 
   getVlcPlayer (payload) {
-    Log.log(`${moduleName} getVlcPlayer`);
+    Log.info(`${moduleName} getVlcPlayer`);
     const opts = {
       detached: false,
       env: environ,
@@ -192,7 +192,7 @@ module.exports = NodeHelper.create({
             args.unshift("--no-audio");
           }
         }
-        Log.log(`${moduleName} Starting stream ${s.name} using ${playerCmd.toUpperCase()} with args ${args.join(" ")}...`);
+        Log.info(`${moduleName} Starting stream ${s.name} using ${playerCmd.toUpperCase()} with args ${args.join(" ")}...`);
 
         this.vlcStream[s.name] = child_process.spawn(playerCmd, args, opts);
 
@@ -201,6 +201,7 @@ module.exports = NodeHelper.create({
         });
 
         dp2Check = true;
+        this.vlcLoaded = true;
       }
     });
 
@@ -252,7 +253,7 @@ end
     const vlcLuaPath = path.resolve(`${__dirname}/scripts/vlc.lua`);
     // Check if the vlc.lua file exists, if not, create it.
     if (!fs.existsSync(vlcLuaPath)) {
-      Log.log(`${moduleName} DP2: Creating vlc.lua file...`);
+      Log.info(`${moduleName} DP2: Creating vlc.lua file...`);
       fs.writeFileSync(vlcLuaPath, "");
     }
     fs.readFile(
@@ -274,9 +275,9 @@ end
                 throw innerErr;
               }
 
-              Log.log(`${moduleName} DP2: Config File Saved!`);
+              Log.info(`${moduleName} DP2: Config File Saved!`);
               if (this.config.debug) {
-                Log.log(dp2Config);
+                Log.info(dp2Config);
               }
               startDp2();
               // Give the windows time to settle, then re-call to resize again.
@@ -297,13 +298,13 @@ end
 
   stopVlcPlayer (name, delay, callback) {
     const quitVlc = () => {
-      Log.log(`${moduleName} Stopping stream ${name}`);
+      Log.info(`${moduleName} Stopping stream ${name}`);
       if (name in this.vlcStream) {
         try {
           this.vlcStream[name].stderr.removeAllListeners();
           this.vlcStream[name].kill();
         } catch (err) {
-          Log.log(err);
+          Log.error(err);
         }
         delete this.vlcStream[name];
         delete this.vlcDelayedExit[name];
@@ -336,7 +337,7 @@ end
 
   stopAllVlcPlayers (delay, callback) {
     if (Object.keys(this.vlcStream).length > 0) {
-      Log.log(delay
+      Log.info(delay
         ? `${moduleName} Delayed exit of all VLC Streams in ${delay} sec...`
         : `${moduleName} Killing All VLC Streams...`);
       Object.keys(this.vlcStream).forEach((s) => {
@@ -349,7 +350,7 @@ end
             delete this.vlcStream[s];
             delete this.vlcDelayedExit[s];
           } catch (err) {
-            Log.log(err);
+            Log.error(err);
           }
         }
       });
