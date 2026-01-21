@@ -418,7 +418,7 @@ Module.register("MMM-RTSPStream", {
   },
 
   playStream (stream, fullscreen = false, absPosition = undefined) {
-    Log.info(`[${this.name}] playStream ${stream}`);
+    Log.info(`[${this.name}] playStream ${stream}, fullscreen:${fullscreen}, absPosition:${absPosition}`);
     const canvasId = this.config.rotateStreams
       ? "canvas_"
       : `canvas_${stream}`;
@@ -559,7 +559,7 @@ Module.register("MMM-RTSPStream", {
 
   stopStream (stream, vlcStopAll = false) {
     if (this.streams[stream].playing) {
-      Log.info(`[${this.name}] Stopping ${stream}`);
+      Log.info(`[${this.name}] Stopping ${stream}, vlcStopAll:${vlcStopAll}`);
       if (
         this.instance === "SERVER" &&
         this.config.localPlayer === "vlc" &&
@@ -682,8 +682,8 @@ Module.register("MMM-RTSPStream", {
 
   notificationReceived (notification, payload) {
     let ps = [];
-    Log.info(`[${this.name}] notificationReceived: ${notification}`);
     if (notification === "DOM_OBJECTS_CREATED") {
+      Log.info(`[${this.name}] notificationReceived: ${notification}`);
       // Register Key Handler
       if (
         this.config.keyBindings.enabled &&
@@ -734,6 +734,7 @@ Module.register("MMM-RTSPStream", {
 
     // Handle USER_PRESENCE events from the MMM-PIR-sensor Module
     if (notification === "USER_PRESENCE") {
+      Log.info(`[${this.name}] notificationReceived: ${notification}`);
       if (payload) {
         if (this.suspended && this.suspendedForUserPresence) {
           this.resumed();
@@ -745,6 +746,7 @@ Module.register("MMM-RTSPStream", {
       }
     }
     if (notification === "RTSP-PLAY" && this.instance === "SERVER") {
+      Log.info(`[${this.name}] notificationReceived: ${notification}`);
       if (!payload || JSON.stringify(payload) === "{}" || payload === "all") {
         if (this.config.rotateStreams) {
           this.playing = true;
@@ -762,12 +764,15 @@ Module.register("MMM-RTSPStream", {
       }
     }
     if (notification === "RTSP-PLAY-FULLSCREEN" && this.instance === "SERVER") {
+      Log.info(`[${this.name}] notificationReceived: ${notification}`);
       ps = this.playStream(payload, true);
     }
     if (notification === "RSTP-PLAY-WINDOW" && this.instance === "SERVER") {
+      Log.info(`[${this.name}] notificationReceived: ${notification}`);
       ps = this.playStream(payload.name, false, payload.box);
     }
     if (notification === "RTSP-STOP" && this.instance === "SERVER") {
+      Log.info(`[${this.name}] notificationReceived: ${notification}`);
       if (!payload || JSON.stringify(payload) === "{}" || payload === "all") {
         this.stopAllStreams();
       } else {
@@ -777,6 +782,7 @@ Module.register("MMM-RTSPStream", {
 
     if (ps.length > 0) {
       if (this.config.localPlayer === "vlc") {
+        Log.info(`[${this.name}] sending : PLAY_VLCSTREAM`);
         this.sendSocketNotification("PLAY_VLCSTREAM", ps);
       }
     }
