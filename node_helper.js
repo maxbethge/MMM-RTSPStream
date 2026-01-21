@@ -369,6 +369,7 @@ end
    * argument payload mixed - The payload of the notification.
    */
   socketNotificationReceived (notification, payload) {
+    Log.info(`${moduleName} notification ${notification}`);
     if (notification === "CONFIG") {
       this.config = payload;
       const streams = Object.keys(this.config).filter((key) => key.startsWith("stream"));

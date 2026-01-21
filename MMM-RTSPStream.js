@@ -91,6 +91,7 @@ Module.register("MMM-RTSPStream", {
 
   start () {
     const self = this;
+    Log.info(`[${this.name}] start()`);
 
     // Flag for check if module is loaded
     this.loaded = false;
@@ -417,6 +418,7 @@ Module.register("MMM-RTSPStream", {
   },
 
   playStream (stream, fullscreen = false, absPosition = undefined) {
+    Log.info(`[${this.name}] playStream ${stream}`);
     const canvasId = this.config.rotateStreams
       ? "canvas_"
       : `canvas_${stream}`;
@@ -430,6 +432,7 @@ Module.register("MMM-RTSPStream", {
     const webrtcActive = this.instance === "LOCAL" && this.config.remotePlayer === "webrtc" || this.instance === "SERVER" && this.config.localPlayer === "webrtc";
 
     if (this.instance === "SERVER" && this.config.localPlayer === "vlc") {
+      Log.info(`[${this.name}] instance==SERVER,localPlayer=vlc`);
       const rect = surface.getBoundingClientRect();
       const offset = {};
       const payload = {name: stream};
@@ -448,6 +451,7 @@ Module.register("MMM-RTSPStream", {
       }
       let box = {};
       if ("absPosition" in this.config[stream]) {
+        Log.info(`[${this.name}] absPosition set`);
         box = this.config[stream].absPosition;
       } else if (typeof absPosition !== "undefined") {
         box = absPosition;
@@ -620,6 +624,7 @@ Module.register("MMM-RTSPStream", {
 
   toggleStreams (payload) {
     let ps = [];
+    Log.info(`[${this.name}] toggleStreams()`);
     if (this.config.rotateStreams) {
       if (this.playing) {
         this.stopStream(this.currentStream);
@@ -677,7 +682,7 @@ Module.register("MMM-RTSPStream", {
 
   notificationReceived (notification, payload) {
     let ps = [];
-
+    Log.info(`[${this.name}] notificationReceived: ${notification}`);
     if (notification === "DOM_OBJECTS_CREATED") {
       // Register Key Handler
       if (
@@ -803,6 +808,7 @@ Module.register("MMM-RTSPStream", {
   selectedStream: "",
 
   selectStream (direction = 1, clear = false) {
+    Log.info(`[${this.name}] selectStream - direction: ${direction}, clear: ${clear}`);
     const k = Object.keys(this.streams);
     if (!clear) {
       if (!this.selectedStream) {
@@ -832,6 +838,7 @@ Module.register("MMM-RTSPStream", {
   },
   // socketNotificationReceived from helper
   socketNotificationReceived (notification, payload) {
+    Log.info(`[${this.name}] socketNotificationReceived: ${notification}`);
     if (notification === "STARTED") {
       if (!this.loaded) {
         this.loaded = true;
